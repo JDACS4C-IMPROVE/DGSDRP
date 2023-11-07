@@ -4,9 +4,9 @@ import sys, os
 from random import shuffle
 import torch
 import torch.nn as nn
-from models.gat import GATNet
+# from models.gat import GATNet
 from models.gat_gcn import GAT_GCN
-from models.gcn import GCNNet
+# from models.gcn import GCNNet
 from models.ginconv import GINConvNet
 from utils import *
 import datetime
@@ -58,40 +58,46 @@ def main(modeling, train_batch, val_batch, test_batch, lr, num_epoch, log_interv
     val_losses = []
     val_pearsons = []
     print('\nrunning on ', model_st + '_' + dataset )
-    #processed_data_file_train = 'data/processed/' + dataset + '_train_mix'+'.pt'
-    #processed_data_file_val = 'data/processed/' + dataset + '_val_mix'+'.pt'
-    #processed_data_file_test = 'data/processed/' + dataset + '_test_mix'+'.pt'
+
+    # mixed test dataset
+    if os.path.exists('data/processed/' + dataset + '_train_mix'+'.pt'):
+        processed_data_file_train = 'data/processed/' + dataset + '_train_mix'+'.pt'
+        processed_data_file_val = 'data/processed/' + dataset + '_val_mix'+'.pt'
+        processed_data_file_test = 'data/processed/' + dataset + '_test_mix'+'.pt'
+        
+        train_data = TestbedDataset(root='data', dataset=dataset+'_train_mix')
+        val_data = TestbedDataset(root='data', dataset=dataset+'_val_mix')
+        test_data = TestbedDataset(root='data', dataset=dataset+'_test_mix')
+
     
     # drug_blind
-    #processed_data_file_train = 'data/processed/' + dataset + '_train_blind'+'.pt'
-    #processed_data_file_val = 'data/processed/' + dataset + '_val_blind'+'.pt'
-    #processed_data_file_test = 'data/processed/' + dataset + '_test_blind'+'.pt'
+    elif os.path.exists('data/processed/' + dataset + '_train_blind'+'.pt'):
+        processed_data_file_train = 'data/processed/' + dataset + '_train_blind'+'.pt'
+        processed_data_file_val = 'data/processed/' + dataset + '_val_blind'+'.pt'
+        processed_data_file_test = 'data/processed/' + dataset + '_test_blind'+'.pt'
+        
+        train_data = TestbedDataset(root='data', dataset=dataset+'_train_blind')
+        val_data = TestbedDataset(root='data', dataset=dataset+'_val_blind')
+        test_data = TestbedDataset(root='data', dataset=dataset+'_test_blind')
+
 
     # cell blind
-    processed_data_file_train = 'data/processed/' + dataset + '_train_cell_blind'+'.pt'
-    processed_data_file_val = 'data/processed/' + dataset + '_val_cell_blind'+'.pt'
-    processed_data_file_test = 'data/processed/' + dataset + '_test_cell_blind'+'.pt'
+    elif os.path.exists('data/processed/' + dataset + '_train_cell_blind'+'.pt'):
+        processed_data_file_train = 'data/processed/' + dataset + '_train_cell_blind'+'.pt'
+        processed_data_file_val = 'data/processed/' + dataset + '_val_cell_blind'+'.pt'
+        processed_data_file_test = 'data/processed/' + dataset + '_test_cell_blind'+'.pt'
 
-
-
-    if ((not os.path.isfile(processed_data_file_train)) or (not os.path.isfile(processed_data_file_val)) or (not os.path.isfile(processed_data_file_test))):
-        print('please run create_data.py to prepare data in pytorch format!')
-    else:
-        #train_data = TestbedDataset(root='data', dataset=dataset+'_train_mix')
-        #val_data = TestbedDataset(root='data', dataset=dataset+'_val_mix')
-        #test_data = TestbedDataset(root='data', dataset=dataset+'_test_mix')
-
-        # drug blind
-        #train_data = TestbedDataset(root='data', dataset=dataset+'_train_blind')
-        #val_data = TestbedDataset(root='data', dataset=dataset+'_val_blind')
-        #test_data = TestbedDataset(root='data', dataset=dataset+'_test_blind')
-        
-        #cell blind
         train_data = TestbedDataset(root='data', dataset=dataset+'_train_cell_blind')
         val_data = TestbedDataset(root='data', dataset=dataset+'_val_cell_blind')
         test_data = TestbedDataset(root='data', dataset=dataset+'_test_cell_blind')
 
 
+    else:
+        raise Exception('Please run preprocess.py with a particular --choice')
+
+    if ((not os.path.isfile(processed_data_file_train)) or (not os.path.isfile(processed_data_file_val)) or (not os.path.isfile(processed_data_file_test))):
+        print('please run create_data.py to prepare data in pytorch format!')
+    else:
         # make data PyTorch mini-batch processing ready
         train_loader = DataLoader(train_data, batch_size=train_batch, shuffle=True)
         val_loader = DataLoader(val_data, batch_size=val_batch, shuffle=False)
