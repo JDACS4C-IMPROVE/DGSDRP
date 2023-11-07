@@ -1,0 +1,10 @@
+data/*
+!data/data.zip
+__pycache__/
+drug_dict
+list_cell_mix_test
+list_drug_mix_test
+*.model
+mut_dict
+result_*.csv
+.vscode/
